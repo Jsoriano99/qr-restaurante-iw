@@ -1,0 +1,34 @@
+%%{init: {'theme': 'base', 'themeVariables': {'fontSize': '11px', 'nodeBorder': '1px', 'nodeRadius': '4px'}}}%%
+graph TB
+    CLIENTE["👤 Cliente"]
+    REST["🏪 Restaurante"]
+    ADMIN["🛡️ Admin"]
+
+    CLIENTE --> HOME["🏠 Home"]
+    CLIENTE --> LIST["📊 Listado"]
+    CLIENTE --> DET["🏪 Detalle"]
+    CLIENTE --> SCAN["📱 Escaneo"]
+    CLIENTE --> ENTRY["🚪 Entrada"]
+    CLIENTE --> MYVIS["👤 Mis<br>Visitas"]
+    CLIENTE --> EXIT["🚶 Salida"]
+    CLIENTE --> RATE["⭐ Valorar"]
+
+    REST --> LOGIN_R["🔐 Login"]
+    REST --> PANEL["📊 Panel"]
+    REST --> QR["🔲 Gestión QR"]
+    REST --> REPORT["📈 Reportes"]
+    REST --> DATA["📝 Mis Datos"]
+
+    ADMIN --> LOGIN_A["🔐 Login Admin"]
+    ADMIN --> GEST["⚙️ Gestión<br>Restaurantes"]
+    ADMIN --> GLOB["🌐 Reportes<br>Globales"]
+    ADMIN --> USERS["👥 Usuarios"]
+
+    CLIENTE --> VERDICT["🎯 Pruebas"]
+    REST --> VERDICT
+    ADMIN --> VERDICT
+
+    style CLIENTE fill:#4CAF50,color:#fff
+    style REST fill:#2196F3,color:#fff
+    style ADMIN fill:#F44336,color:#fff
+    style VERDICT fill:#fff9c4,stroke:#f57f17,stroke-width:3px,color:#333

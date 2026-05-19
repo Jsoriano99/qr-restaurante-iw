@@ -1,0 +1,12 @@
+Element ID,Type,Label,Position X,Position Y,Notes
+N1,Initial Node,Inicio,250,50,
+N2,Activity,Solicitar generación de código QR,250,120,
+N3,Activity,Verificar que el restaurante está registrado y activo,250,200,
+N4,Activity,Generar identificador único (UUID) para el código QR,250,280,
+N5,Activity,Codificar información en formato QR: - ID restaurante - ID mesa/acceso - Timestamp - Hash de validación,250,350,
+N6,Activity,Generar imagen del código QR,250,420,
+N7,Activity,Almacenar código QR generado en la base de datos,250,490,
+N8,Activity,Entregar código QR al restaurante para impresión,250,560,
+N9,Final Node,Fin - Éxito,250,630,
+E1,Error Node,Fin - Error,450,200,
+D1,Decision,¿Restaurante válido?,250,240,

@@ -1,0 +1,36 @@
+%%{init: {'theme': 'base', 'themeVariables': {'fontSize': '11px', 'nodeBorder': '1px', 'nodeRadius': '4px'}}}%%
+graph TD
+    ESTRATEGIA["📐 Estrategia de Testing"]
+    UNIT["🔬 Pruebas Unitarias"]
+    INTEG["🔗 Pruebas de Integración"]
+    SISTEMA["🌐 Pruebas de Sistema"]
+    ACEPT["✅ Pruebas de Aceptación"]
+
+    UNIT --> FUNC[⚙️ Funcionales]
+    UNIT --> NO_FUNC[📋 No Funcionales]
+    INTEG --> FUNC
+    INTEG --> SEGURIDAD[🔒 Seguridad]
+    SISTEMA --> FUNC
+    SISTEMA --> RENDIMIENTO[⚡ Rendimiento]
+    ACEPT --> NO_FUNC
+
+    ESTRATEGIA --> UNIT
+    ESTRATEGIA --> INTEG
+    ESTRATEGIA --> SISTEMA
+    ESTRATEGIA --> ACEPT
+
+    FUNC --> VERDICT["✅ VEREDICTO FINAL"]
+    NO_FUNC --> VERDICT
+    SEGURIDAD --> VERDICT
+    RENDIMIENTO --> VERDICT
+
+    style ESTRATEGIA fill:#ffebee,stroke:#c62828,color:#333
+    style VERDICT fill:#fff9c4,stroke:#f57f17,stroke-width:3px,color:#333
+    style UNIT fill:#e3f2fd,stroke:#1565c0,color:#333
+    style INTEG fill:#e3f2fd,stroke:#1565c0,color:#333
+    style SISTEMA fill:#e3f2fd,stroke:#1565c0,color:#333
+    style ACEPT fill:#e3f2fd,stroke:#1565c0,color:#333
+    style FUNC fill:#e8f5e9,stroke:#2e7d32,color:#333
+    style NO_FUNC fill:#e8f5e9,stroke:#2e7d32,color:#333
+    style SEGURIDAD fill:#e8f5e9,stroke:#2e7d32,color:#333
+    style RENDIMIENTO fill:#e8f5e9,stroke:#2e7d32,color:#333

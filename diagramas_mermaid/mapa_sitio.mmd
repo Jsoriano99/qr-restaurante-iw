@@ -1,0 +1,58 @@
+%%{init: {'theme': 'base', 'themeVariables': {'fontSize': '11px', 'nodeBorder': '1px', 'nodeRadius': '4px'}}}%%
+graph LR
+    HOME["🏠 Inicio"]
+    REG["📋 Registro<br>Restaurante"]
+    GENQR["🔲 Generar<br>QR"]
+    LIST["📊 Listado<br>Restaurantes"]
+    DET["🏪 Detalle"]
+    SCAN["📱 Escaneo<br>QR"]
+    ENTRY["🚪 Entrada"]
+    MYVIS["👤 Mis<br>Visitas"]
+    EXIT["🚶 Salida"]
+    RATE["⭐ Valorar"]
+    LOGIN["🔐 Login"]
+    CLI["👤 Perfil<br>Cliente"]
+    REST["🏪 Perfil<br>Restaurante"]
+    PANEL["📊 Panel<br>Control"]
+    REPORT["📈 Reportes"]
+    ADMIN["🛡️ Panel<br>Admin"]
+    GEST["⚙️ Gestión<br>Restaurantes"]
+    USERS["👥 Gestión<br>Usuarios"]
+    CONFIG["🔧 Configuración<br>Sistema"]
+    GLOBAL["🌐 Reportes<br>Globales"]
+
+    HOME --> REG
+    HOME --> LIST
+    HOME --> LOGIN
+
+    REG --> GENQR
+    LIST --> DET
+    DET --> SCAN
+    DET --> ENTRY
+    DET --> MYVIS
+    SCAN --> ENTRY
+    ENTRY --> EXIT
+    EXIT --> RATE
+
+    LOGIN --> CLI
+    LOGIN --> REST
+    LOGIN --> ADMIN
+
+    CLI --> MYVIS
+    CLI --> RATE
+
+    REST --> PANEL
+    REST --> REPORT
+
+    PANEL --> GENQR
+
+    ADMIN --> GEST
+    ADMIN --> GLOBAL
+    ADMIN --> USERS
+    USERS --> CONFIG
+
+    style HOME fill:#4CAF50,color:#fff
+    style LOGIN fill:#2196F3,color:#fff
+    style ADMIN fill:#F44336,color:#fff
+    style SCAN fill:#FF9800,color:#fff
+    style RATE fill:#9C27B0,color:#fff

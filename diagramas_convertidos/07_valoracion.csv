@@ -1,0 +1,13 @@
+Element ID,Type,Label,Position X,Position Y,Notes
+N1,Initial Node,Inicio,300,50,
+N2,Activity,Acceder a registro de valoración tras visita,300,120,
+N3,Activity,Seleccionar puntuación (1-5 estrellas),300,190,
+N4,Activity,Escribir comentario (máx. 500 caracteres),300,260,
+N5,Activity,Validar contenido: - Longitud correcta - Sin contenido ofensivo,300,330,
+N6,Activity,Guardar valoración en base de datos: - ID restaurante - ID cliente - Puntuación - Comentario (opt) - Timestamp,300,400,
+N7,Activity,Recalcular valoración media del restaurante,300,470,
+N8,Activity,Confirmar valoración enviada,300,540,
+N9,Final Node,Fin - Valoración registrada,300,610,
+E1,Error Node,Mostrar error,550,330,
+D1,Decision,¿Añadir comentario?,300,225,
+D2,Decision,¿Contenido válido?,300,365,
