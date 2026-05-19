@@ -1,0 +1,79 @@
+// QR Restaurante - Schema de Base de Datos
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+// Cliente - Usuario que escanea QR y hace pedidos
+model Cliente {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  nombre    String
+  telefono  String?
+  role      String   @default("CLIENTE")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  refreshTokens RefreshToken[]
+
+  @@map("clientes")
+}
+
+// Restaurante - Dueño de restaurant que gestiona menús y pedidos
+model Restaurante {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  nombre    String
+  direccion String
+  telefono  String
+  horarios  String?
+  qrCode    String   @unique
+  role      String   @default("RESTAURANTE")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  refreshTokens RefreshToken[]
+
+  @@map("restaurantes")
+}
+
+// Administrador del sistema
+model Administrador {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  nombre    String
+  role      String   @default("ADMIN")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  refreshTokens RefreshToken[]
+
+  @@map("administradores")
+}
+
+// Refresh Tokens
+model RefreshToken {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  revoked   Boolean  @default(false)
+
+  clienteId     String?
+  restauranteId String?
+  administradorId String?
+
+  cliente       Cliente?       @relation(fields: [clienteId], references: [id], onDelete: Cascade)
+  restaurante   Restaurante?   @relation(fields: [restauranteId], references: [id], onDelete: Cascade)
+  administrador Administrador? @relation(fields: [administradorId], references: [id], onDelete: Cascade)
+
+  @@map("refresh_tokens")
+}

@@ -1,0 +1,100 @@
+// QR Restaurante - Schema de Base de Datos
+// Basado en SDD autenticacion
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+// ======================
+// ENUMS
+// ======================
+
+enum UserRole {
+  CLIENTE
+  RESTAURANTE
+  ADMIN
+}
+
+// ======================
+// MODELOS
+// ======================
+
+// Cliente - Usuario que escanea QR y hace pedidos
+model Cliente {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  nombre    String
+  telefono  String?
+  role      UserRole @default(CLIENTE)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relaciones
+  refreshTokens RefreshToken[]
+
+  @@map("clientes")
+}
+
+// Restaurante - Dueño de restaurant que gestiona menús y pedidos
+model Restaurante {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  nombre    String
+  direccion String
+  telefono  String
+  // Horarios: guardado como texto JSON string
+  horarios  String?
+  // QR Code único para identificar al restaurante
+  qrCode    String   @unique
+  role      UserRole @default(RESTAURANTE)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relaciones
+  refreshTokens RefreshToken[]
+
+  @@map("restaurantes")
+}
+
+// Administrador del sistema
+model Administrador {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  nombre    String
+  role      UserRole @default(ADMIN)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relaciones
+  refreshTokens RefreshToken[]
+
+  @@map("administradores")
+}
+
+// Refresh Tokens - Para rotación de tokens
+model RefreshToken {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  revoked   Boolean  @default(false)
+
+  // Relaciones
+  clienteId       String?
+  restauranteId   String?
+  administradorId String?
+
+  cliente       Cliente?       @relation(fields: [clienteId], references: [id], onDelete: Cascade)
+  restaurante   Restaurante?   @relation(fields: [restauranteId], references: [id], onDelete: Cascade)
+  administrador Administrador? @relation(fields: [administradorId], references: [id], onDelete: Cascade)
+
+  @@map("refresh_tokens")
+}
