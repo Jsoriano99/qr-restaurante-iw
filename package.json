@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "seed": "ts-node prisma/seed.ts",
+    "seed:reset": "prisma migrate reset --force"
   },
   "dependencies": {
     "@prisma/client": "^5.22.0",
@@ -29,6 +31,7 @@
     "postcss": "^8.5.15",
     "prisma": "^5.22.0",
     "tailwindcss": "^3.4.19",
+    "ts-node": "^10.9.2",
     "typescript": "^5"
   }
 }
