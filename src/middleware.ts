@@ -6,7 +6,7 @@ import { jwtVerify } from 'jose';
 
 const JWT_SECRET = new TextEncoder().encode(process.env.NEXTAUTH_SECRET || 'secret-temporal');
 
-const publicPaths = ['/', '/login', '/register', '/api/auth/register', '/api/auth/login', '/api/auth/refresh', '/_next', '/favicon.ico'];
+const publicPaths = ['/', '/login', '/register', '/api/auth/register', '/api/auth/login', '/api/auth/refresh', '/api/auth/me', '/_next', '/favicon.ico'];
 
 const roleProtectedPaths: { path: string; roles: string[] }[] = [
   { path: '/admin', roles: ['ADMIN'] },

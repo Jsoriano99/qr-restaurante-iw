@@ -36,7 +36,9 @@ export default function LoginPage() {
         ADMIN: '/admin',
       };
 
-      router.push(roleRedirect[data.data.user.role] || '/');
+      // Navigate using window.location for a full page reload
+      // This ensures the middleware runs with the fresh cookie
+      window.location.href = roleRedirect[data.data.user.role] || '/';
     } catch {
       setError('Error de conexión');
     } finally {
