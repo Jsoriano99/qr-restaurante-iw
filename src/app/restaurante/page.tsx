@@ -15,8 +15,8 @@ export default function RestaurantePage() {
         const res = await fetch('/api/auth/me');
         if (!res.ok) { router.push('/login'); return; }
         const data = await res.json();
-        if (data.user.role !== 'RESTAURANTE') { router.push('/'); return; }
-        setUser(data.user);
+        if (data.data?.user?.role !== 'RESTAURANTE') { router.push('/'); return; }
+        setUser(data.data.user);
       } catch { router.push('/login'); } finally { setLoading(false); }
     };
     checkUser();
