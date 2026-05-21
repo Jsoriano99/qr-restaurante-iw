@@ -1,6 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import QrManager from '@/components/restaurante/QrManager';
 
 interface User { id: string; email: string; nombre: string; role: string; }
 
@@ -41,12 +42,8 @@ export default function RestaurantePage() {
         </div>
       </header>
       <main className="container mx-auto py-8 px-4">
-        <h2 className="text-2xl font-bold mb-6">Panel de Restaurante</h2>
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <div className="bg-white p-6 rounded-lg shadow"><h3 className="text-lg font-bold mb-2">🍽️ Menú</h3><p className="text-gray-600">Gestiona tus platos y categorías</p></div>
-          <div className="bg-white p-6 rounded-lg shadow"><h3 className="text-lg font-bold mb-2">📋 Pedidos</h3><p className="text-gray-600">Ver y gestionar pedidos entrantes</p></div>
-          <div className="bg-white p-6 rounded-lg shadow"><h3 className="text-lg font-bold mb-2">📊 Mis Estadísticas</h3><p className="text-gray-600">Ver el rendimiento de tu restaurante</p></div>
-        </div>
+        <h2 className="text-2xl font-bold mb-6">Gestión de Códigos QR</h2>
+        <QrManager />
       </main>
     </div>
   );

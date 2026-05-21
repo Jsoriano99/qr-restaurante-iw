@@ -1,4 +1,5 @@
 'use client';
+import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 
@@ -41,12 +42,22 @@ export default function ClientePage() {
         </div>
       </header>
       <main className="container mx-auto py-8 px-4">
-        <h2 className="text-2xl font-bold mb-6">Explora Restaurantes</h2>
-        <div className="bg-white p-6 rounded-lg shadow mb-6">
-          <h3 className="text-lg font-bold mb-2">📷 Escanea un QR</h3>
-          <p className="text-gray-600">Escanea el código QR de tu mesa para ver el menú del restaurante</p>
-          <p className="text-sm text-gray-500 mt-2">(En una app móvil, usarías la cámara del dispositivo)</p>
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-2xl font-bold">Explora Restaurantes</h2>
+          <Link
+            href="/restaurantes"
+            className="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700 transition-colors text-sm font-medium"
+          >
+            Ver Todos
+          </Link>
         </div>
+        <Link
+          href="/restaurantes"
+          className="block bg-white p-6 rounded-lg shadow mb-6 hover:shadow-md transition-shadow"
+        >
+          <h3 className="text-lg font-bold mb-2">🔍 Explorar Restaurantes</h3>
+          <p className="text-gray-600">Ver todos los restaurantes disponibles y sus menús</p>
+        </Link>
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           <div className="bg-white p-6 rounded-lg shadow"><h3 className="text-lg font-bold mb-2">🛒 Mis Pedidos</h3><p className="text-gray-600">Ver historial de pedidos</p></div>
           <div className="bg-white p-6 rounded-lg shadow"><h3 className="text-lg font-bold mb-2">❤️ Mis Favoritos</h3><p className="text-gray-600">Restaurantes guardados</p></div>

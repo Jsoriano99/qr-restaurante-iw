@@ -1,4 +1,5 @@
 // Middleware de autenticación - QR Restaurante
+// Este middleware intercepta todas las solicitudes para verificar la autenticación y autorización del usuario.
 
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
@@ -6,8 +7,9 @@ import { jwtVerify } from 'jose';
 
 const JWT_SECRET = new TextEncoder().encode(process.env.NEXTAUTH_SECRET || 'secret-temporal');
 
-const publicPaths = ['/', '/login', '/register', '/api/auth/register', '/api/auth/login', '/api/auth/refresh', '/api/auth/me', '/_next', '/favicon.ico'];
+const publicPaths = ['/', '/login', '/register', '/restaurantes', '/restaurante/', '/api/auth/register', '/api/auth/login', '/api/auth/refresh', '/api/auth/me', '/api/restaurantes', '/api/codigos-qr', '/_next', '/favicon.ico'];
 
+// Definimos rutas protegidas por rol
 const roleProtectedPaths: { path: string; roles: string[] }[] = [
   { path: '/admin', roles: ['ADMIN'] },
   { path: '/restaurante', roles: ['RESTAURANTE'] },
@@ -17,10 +19,16 @@ const roleProtectedPaths: { path: string; roles: string[] }[] = [
   { path: '/api/cliente', roles: ['CLIENTE'] },
 ];
 
+// Función para verificar si la ruta es pública
 function isPublicPath(pathname: string): boolean {
-  return publicPaths.some((path) => pathname.startsWith(path));
+  return publicPaths.some((path) => {
+    // La raíz '/' debe coincidir exactamente, no como prefijo
+    if (path === '/') return pathname === '/';
+    return pathname.startsWith(path);
+  });
 }
 
+// Middleware principal para autenticación y autorización
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 

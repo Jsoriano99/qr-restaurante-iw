@@ -21,6 +21,8 @@ model Cliente {
   updatedAt DateTime @updatedAt
 
   refreshTokens RefreshToken[]
+  visitas       Visita[]
+  valoraciones  Valoracion[]
 
   @@map("clientes")
 }
@@ -34,12 +36,24 @@ model Restaurante {
   direccion String
   telefono  String
   horarios  String?
+
+  // Información del establecimiento
+  tipoCocina      String  @default("")
+  capacidadMaxima Int     @default(0)
+  horarioApertura String?
+  horarioCierre   String?
+  latitud         Float?
+  longitud        Float?
+
   qrCode    String   @unique
   role      String   @default("RESTAURANTE")
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   refreshTokens RefreshToken[]
+  codigosQR     CodigoQR[]
+  visitas       Visita[]
+  valoraciones  Valoracion[]
 
   @@map("restaurantes")
 }
@@ -59,6 +73,60 @@ model Administrador {
   @@map("administradores")
 }
 
+// CodigoQR - Códigos QR generados por restaurantes para mesas/accesos
+model CodigoQR {
+  uuid            String   @id
+  idMesa          String
+  activo          Boolean  @default(true)
+  fechaCreacion   DateTime @default(now())
+  fechaExpiracion DateTime?
+
+  restauranteId String
+  restaurante   Restaurante @relation(fields: [restauranteId], references: [id], onDelete: Cascade)
+
+  visitas Visita[]
+
+  @@map("codigos_qr")
+}
+
+// Visita - Registro de entrada/salida de clientes en restaurantes
+model Visita {
+  id               String   @id @default(cuid())
+  timestampEntrada DateTime @default(now())
+  timestampSalida  DateTime?
+  duracionMinutos  Int?
+  estado           String   @default("activa")
+  acompanantes     Int      @default(0)
+
+  restauranteId String
+  restaurante   Restaurante @relation(fields: [restauranteId], references: [id], onDelete: Cascade)
+
+  clienteId String
+  cliente   Cliente @relation(fields: [clienteId], references: [id], onDelete: Cascade)
+
+  codigoQRId String
+  codigoQR   CodigoQR @relation(fields: [codigoQRId], references: [uuid], onDelete: Cascade)
+
+  @@map("visitas")
+}
+
+// Valoracion - Puntuación y comentario de cliente a restaurante
+model Valoracion {
+  id         String   @id @default(cuid())
+  puntuacion Int
+  comentario String?
+  timestamp  DateTime @default(now())
+
+  restauranteId String
+  restaurante   Restaurante @relation(fields: [restauranteId], references: [id], onDelete: Cascade)
+
+  clienteId String
+  cliente   Cliente @relation(fields: [clienteId], references: [id], onDelete: Cascade)
+
+  @@unique([clienteId, restauranteId], name: "una_valoracion_por_cliente_restaurante")
+  @@map("valoraciones")
+}
+
 // Refresh Tokens
 model RefreshToken {
   id        String   @id @default(cuid())
@@ -67,8 +135,8 @@ model RefreshToken {
   createdAt DateTime @default(now())
   revoked   Boolean  @default(false)
 
-  clienteId     String?
-  restauranteId String?
+  clienteId       String?
+  restauranteId   String?
   administradorId String?
 
   cliente       Cliente?       @relation(fields: [clienteId], references: [id], onDelete: Cascade)
