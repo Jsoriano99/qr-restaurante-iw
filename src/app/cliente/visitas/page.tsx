@@ -5,6 +5,7 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 
 interface User { id: string; email: string; nombre: string; role: string; }
 
@@ -47,6 +48,7 @@ export default function VisitasPage() {
   const [filter, setFilter] = useState<FilterTab>('todas');
   const [fetching, setFetching] = useState(true);
   const [error, setError] = useState('');
+  const [restaurantesValorados, setRestaurantesValorados] = useState<Set<string>>(new Set());
   const [salidaLoading, setSalidaLoading] = useState<string | null>(null);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
@@ -80,16 +82,25 @@ export default function VisitasPage() {
       if (estadoFiltro === 'activas') url += '&estado=activa';
       if (estadoFiltro === 'completadas') url += '&estado=completada';
 
-      const res = await fetch(url);
-      const data = await res.json();
+      const [visitasRes, valoracionesRes] = await Promise.all([
+        fetch(url),
+        fetch('/api/cliente/valoraciones/mias'),
+      ]);
 
-      if (!data.success) {
-        setError(data.message);
+      const visitasData = await visitasRes.json();
+
+      if (!visitasData.success) {
+        setError(visitasData.message);
         return;
       }
 
-      setVisitas(data.data.visitas);
-      setTotal(data.data.total);
+      setVisitas(visitasData.data.visitas);
+      setTotal(visitasData.data.total);
+
+      const valoracionesData = await valoracionesRes.json();
+      if (valoracionesData.success) {
+        setRestaurantesValorados(new Set(valoracionesData.data.restaurantesIds));
+      }
     } catch {
       setError('Error al cargar tus visitas');
     } finally {
@@ -289,6 +300,15 @@ export default function VisitasPage() {
                         ? 'Registrando salida...'
                         : 'Registrar Salida'}
                     </button>
+                  )}
+
+                  {visita.estado === 'completada' && !restaurantesValorados.has(visita.restaurante.id) && (
+                    <Link
+                      href={`/cliente/valorar/${visita.restaurante.id}`}
+                      className="mt-3 inline-block w-full text-center bg-purple-600 text-white py-2 px-4 rounded hover:bg-purple-700 transition-colors font-medium"
+                    >
+                      Valorá este restaurante
+                    </Link>
                   )}
                 </div>
               ))}

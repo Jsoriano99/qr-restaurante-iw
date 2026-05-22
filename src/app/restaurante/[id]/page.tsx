@@ -35,33 +35,48 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function RestauranteDetailPage({ params }: Props) {
   const { id } = await params;
 
-  const restaurante = await prisma.restaurante.findUnique({
-    where: { id },
-    select: {
-      id: true,
-      nombre: true,
-      direccion: true,
-      telefono: true,
-      horarios: true,
-      tipoCocina: true,
-      capacidadMaxima: true,
-      horarioApertura: true,
-      horarioCierre: true,
-      codigosQR: {
-        where: { activo: true },
-        select: {
-          uuid: true,
-          idMesa: true,
-          activo: true,
+  const [restaurante, valoraciones] = await Promise.all([
+    prisma.restaurante.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        nombre: true,
+        direccion: true,
+        telefono: true,
+        horarios: true,
+        tipoCocina: true,
+        capacidadMaxima: true,
+        horarioApertura: true,
+        horarioCierre: true,
+        codigosQR: {
+          where: { activo: true },
+          select: {
+            uuid: true,
+            idMesa: true,
+            activo: true,
+          },
+          orderBy: { idMesa: 'asc' },
         },
-        orderBy: { idMesa: 'asc' },
       },
-    },
-  });
+    }),
+    prisma.valoracion.findMany({
+      where: { restauranteId: id },
+      include: {
+        cliente: { select: { id: true, nombre: true } },
+      },
+      orderBy: { timestamp: 'desc' },
+      take: 20,
+    }),
+  ]);
 
   if (!restaurante) {
     notFound();
   }
+
+  const totalValoraciones = valoraciones.length;
+  const valoracionMedia = totalValoraciones > 0
+    ? Math.round((valoraciones.reduce((sum, v) => sum + v.puntuacion, 0) / totalValoraciones) * 10) / 10
+    : 0;
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -178,6 +193,73 @@ export default async function RestauranteDetailPage({ params }: Props) {
                   </span>
                 </article>
               ))}
+            </div>
+          )}
+        </section>
+
+        {/* Sección de valoraciones */}
+        <section className="mt-8">
+          <h2 className="text-xl font-bold mb-4 text-gray-800">Valoraciones</h2>
+
+          {totalValoraciones > 0 ? (
+            <>
+              <div className="flex items-center gap-3 mb-6 bg-white p-4 rounded-lg shadow">
+                <span className="text-3xl font-bold text-orange-500">{valoracionMedia}</span>
+                <div>
+                  <div className="flex gap-0.5">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <svg key={star} className="w-5 h-5" viewBox="0 0 24 24" aria-hidden="true">
+                        <path
+                          d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z"
+                          fill={star <= Math.round(valoracionMedia) ? 'currentColor' : 'none'}
+                          stroke="currentColor"
+                          strokeWidth={1.5}
+                          className={star <= Math.round(valoracionMedia) ? 'text-orange-500' : 'text-gray-300'}
+                        />
+                      </svg>
+                    ))}
+                  </div>
+                  <p className="text-sm text-gray-500">
+                    Basado en {totalValoraciones} valoración{totalValoraciones !== 1 ? 'es' : ''}
+                  </p>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                {valoraciones.map((val) => (
+                  <article key={val.id} className="bg-white p-4 rounded-lg shadow">
+                    <div className="flex justify-between items-start mb-2">
+                      <div>
+                        <p className="font-semibold text-gray-800">{val.cliente.nombre}</p>
+                        <div className="flex gap-0.5 mt-1">
+                          {[1, 2, 3, 4, 5].map((star) => (
+                            <svg key={star} className="w-4 h-4" viewBox="0 0 24 24" aria-hidden="true">
+                              <path
+                                d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z"
+                                fill={star <= val.puntuacion ? 'currentColor' : 'none'}
+                                stroke="currentColor"
+                                strokeWidth={1.5}
+                                className={star <= val.puntuacion ? 'text-orange-500' : 'text-gray-300'}
+                              />
+                            </svg>
+                          ))}
+                        </div>
+                      </div>
+                      <time className="text-xs text-gray-500">
+                        {new Date(val.timestamp).toLocaleDateString('es-AR', { year: 'numeric', month: 'long', day: 'numeric' })}
+                      </time>
+                    </div>
+                    {val.comentario && (
+                      <p className="text-gray-600 text-sm mt-2">{val.comentario}</p>
+                    )}
+                  </article>
+                ))}
+              </div>
+            </>
+          ) : (
+            <div className="bg-white p-8 rounded-lg shadow text-center">
+              <p className="text-gray-500 text-lg">No hay valoraciones aún</p>
+              <p className="text-gray-400 text-sm mt-2">Sé el primero en valorar este restaurante</p>
             </div>
           )}
         </section>
