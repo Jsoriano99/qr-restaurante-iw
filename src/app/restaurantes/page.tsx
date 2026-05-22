@@ -1,9 +1,11 @@
 // Restaurantes Page - Listado público de restaurantes disponibles
-// Esta página muestra un listado de todos los restaurantes disponibles en QR Restaurante, con información básica como nombre, dirección, teléfono y horarios. Los usuarios pueden hacer clic en cada restaurante para ver su menú. Esta página es pública y no requiere autenticación.
+// Esta página muestra un listado de todos los restaurantes disponibles en QR Restaurante, con información básica como nombre, dirección, teléfono y horarios. Los usuarios pueden hacer clic en cada restaurante para ver su detalle. Esta página es pública y no requiere autenticación.
 
-import Link from 'next/link';
 import type { Metadata } from 'next';
 import prisma from '@/lib/prisma';
+import RestauranteCard from '@/components/layout/RestauranteCard';
+import type { RestauranteCardProps } from '@/components/layout/RestauranteCard';
+import PublicHeader from '@/components/layout/PublicHeader';
 
 export const dynamic = 'force-dynamic';
 
@@ -12,57 +14,6 @@ export const metadata: Metadata = {
   title: 'Restaurantes - QR Restaurante',
   description: 'Explorá todos los restaurantes disponibles en QR Restaurante',
 };
-
-// Interfaz para las propiedades del componente RestauranteCard
-interface RestauranteCardProps {
-  id: string;
-  nombre: string;
-  direccion: string;
-  telefono: string;
-  horarios: string | null;
-}
-
-// Componente para mostrar la información básica de un restaurante en una tarjeta
-function RestauranteCard({ id, nombre, direccion, telefono, horarios }: RestauranteCardProps) {
-  return (
-    <article
-      className="bg-white p-6 rounded-lg shadow"
-      aria-label={nombre}
-    >
-      <h2 className="text-lg font-bold mb-3">{nombre}</h2>
-
-      <div className="space-y-2 text-gray-600">
-        <p className="flex items-start gap-2">
-          <span aria-hidden="true">📍</span>
-          <span>{direccion}</span>
-        </p>
-        <p className="flex items-center gap-2">
-          <span aria-hidden="true">📞</span>
-          <a
-            href={`tel:${telefono}`}
-            className="hover:text-orange-600 transition-colors"
-          >
-            {telefono}
-          </a>
-        </p>
-        {horarios && (
-          <p className="flex items-center gap-2 text-sm text-gray-500">
-            <span aria-hidden="true">🕐</span>
-            <span>{horarios}</span>
-          </p>
-        )}
-      </div>
-
-      <Link
-        href={`/restaurante/${id}/menu`}
-        className="mt-4 inline-block bg-orange-600 text-white px-4 py-2 rounded hover:bg-orange-700 transition-colors text-sm font-medium"
-        aria-label={`Ver menú de ${nombre}`}
-      >
-        Ver Menú
-      </Link>
-    </article>
-  );
-}
 
 export default async function RestaurantesPage() {
   let restaurantes: RestauranteCardProps[] = [];
@@ -94,21 +45,7 @@ export default async function RestaurantesPage() {
 
   return (
     <div className="min-h-screen bg-gray-100">
-      <header className="bg-orange-600 text-white p-4">
-        <div className="container mx-auto flex justify-between items-center">
-          <Link href="/" className="text-xl font-bold hover:underline">
-            QR Restaurante
-          </Link>
-          <nav className="space-x-4">
-            <Link href="/login" className="hover:underline">
-              Iniciar Sesión
-            </Link>
-            <Link href="/register" className="hover:underline">
-              Registrarse
-            </Link>
-          </nav>
-        </div>
-      </header>
+      <PublicHeader />
 
       <main className="container mx-auto py-8 px-4">
         <h1 className="text-2xl font-bold mb-2 text-gray-800">
