@@ -35,7 +35,8 @@ export interface VisitaAPIResponse {
   success: boolean;
   message: string;
   data?: {
-    visita: VisitaPublico;
+    visita?: VisitaPublico;
+    ocupacion?: OcupacionData;
   };
 }
 
@@ -62,8 +63,19 @@ export interface OcupacionData {
   restauranteId: string;
   capacidadMaxima: number;
   ocupacionActual: number;
-  plazasDisponibles: number;
+  plazasDisponibles: number | null;
   visitasActivas: number;
+  porcentajeOcupacion: number;
+  alerta80: boolean;
+  alerta100: boolean;
+}
+
+export interface OcupacionResponse {
+  success: boolean;
+  message: string;
+  data?: {
+    ocupacion: OcupacionData;
+  };
 }
 
 export interface AforoExcedidoError {

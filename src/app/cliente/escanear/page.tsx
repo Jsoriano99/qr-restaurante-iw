@@ -5,6 +5,7 @@
 
 import { Suspense, useEffect, useState } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
+import type { OcupacionData } from '@/types/visita';
 
 interface User { id: string; email: string; nombre: string; role: string; }
 
@@ -27,6 +28,7 @@ function EscanearContent() {
   const [submitError, setSubmitError] = useState('');
   const [showAforoModal, setShowAforoModal] = useState(false);
   const [aforoMessage, setAforoMessage] = useState('');
+  const [successData, setSuccessData] = useState<{ message: string; ocupacion?: OcupacionData } | null>(null);
 
   // Auth check
   useEffect(() => {
@@ -122,7 +124,10 @@ function EscanearContent() {
       const data = await res.json();
 
       if (res.status === 201) {
-        router.push('/cliente/visitas');
+        setSuccessData({
+          message: 'Entrada registrada exitosamente',
+          ocupacion: data.data?.ocupacion,
+        });
         return;
       }
 
@@ -241,6 +246,29 @@ function EscanearContent() {
               </button>
             </div>
           </>
+        )}
+
+        {/* Éxito — entrada registrada con datos de ocupación */}
+        {successData && (
+          <div className="bg-white p-6 rounded-lg shadow">
+            <h2 className="text-xl font-bold text-center text-green-600 mb-4">
+              ✅ Entrada registrada
+            </h2>
+            <p className="text-center text-gray-700 mb-4">{successData.message}</p>
+
+            {successData.ocupacion?.alerta80 && (
+              <div className="bg-yellow-100 border border-yellow-400 text-yellow-800 px-4 py-3 rounded mb-4">
+                ⚠️ Este restaurante está al {successData.ocupacion.porcentajeOcupacion}% de su capacidad
+              </div>
+            )}
+
+            <button
+              onClick={() => router.push('/cliente/visitas')}
+              className="w-full bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 transition-colors"
+            >
+              Ver mis visitas
+            </button>
+          </div>
         )}
 
         {/* Aforo Modal */}
