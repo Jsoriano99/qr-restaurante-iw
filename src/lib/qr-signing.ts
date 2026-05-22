@@ -9,7 +9,11 @@ export interface QRSigningPayload {
 }
 
 function getSecret(secret?: string): string {
-  return secret || process.env.QR_HMAC_SECRET || process.env.NEXTAUTH_SECRET || '';
+  const key = secret || process.env.QR_HMAC_SECRET || process.env.NEXTAUTH_SECRET || '';
+  if (!key) {
+    throw new Error('QR_HMAC_SECRET no está configurado — los códigos QR no pueden ser firmados');
+  }
+  return key;
 }
 
 export function signQR(payload: QRSigningPayload, secret?: string): string {

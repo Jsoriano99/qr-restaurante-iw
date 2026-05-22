@@ -5,7 +5,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { verifyQR } from '@/lib/qr-signing';
 import { registrarEntradaSchema } from '@/types/visita';
-import type { VisitaPublico, VisitaAPIResponse, VisitasListResponse } from '@/types/visita';
+import type { VisitaPublico, VisitaAPIResponse, VisitasListResponse, OcupacionData } from '@/types/visita';
 
 function mapVisitaToPublico(visita: {
   id: string;
@@ -29,10 +29,43 @@ function mapVisitaToPublico(visita: {
   };
 }
 
+async function calcularOcupacion(
+  restauranteId: string,
+  capacidadMaxima: number
+): Promise<OcupacionData> {
+  const visitasActivas = await prisma.visita.count({
+    where: { restauranteId, estado: 'activa' },
+  });
+
+  const acompanantesSum = await prisma.visita.aggregate({
+    where: { restauranteId, estado: 'activa' },
+    _sum: { acompanantes: true },
+  });
+
+  const totalPersonas = visitasActivas + (acompanantesSum._sum.acompanantes ?? 0);
+  const porcentaje =
+    capacidadMaxima > 0 ? Math.round((totalPersonas / capacidadMaxima) * 100) : 0;
+
+  return {
+    restauranteId,
+    capacidadMaxima,
+    ocupacionActual: totalPersonas,
+    plazasDisponibles: capacidadMaxima > 0 ? Math.max(0, capacidadMaxima - totalPersonas) : null,
+    visitasActivas,
+    porcentajeOcupacion: porcentaje,
+    alerta80: capacidadMaxima > 0 && porcentaje >= 80,
+    alerta100: capacidadMaxima > 0 && porcentaje >= 100,
+  };
+}
+
 // POST /api/cliente/visitas - Registrar entrada (escaneo QR)
 export async function POST(
   request: NextRequest
 ): Promise<NextResponse<VisitaAPIResponse>> {
+  // Variables accesibles desde try y catch para datos de ocupación
+  let restauranteId = '';
+  let capacidadMaxima = 0;
+
   try {
     const userId = request.headers.get('x-user-id');
     const userRole = request.headers.get('x-user-role');
@@ -128,6 +161,10 @@ export async function POST(
       );
     }
 
+    // Guardar datos del restaurante para usarlos en try y catch
+    restauranteId = codigo.restauranteId;
+    capacidadMaxima = codigo.restaurante.capacidadMaxima;
+
     // Transacción: verificar duplicado activo + aforo + crear visita
     const visita = await prisma.$transaction(async (tx) => {
       // Verificar que el cliente no tenga ya una visita activa en este restaurante
@@ -159,7 +196,7 @@ export async function POST(
 
       const capacidadMaxima = codigo.restaurante.capacidadMaxima;
 
-      if (ocupacionActual + 1 + acompanantes > capacidadMaxima) {
+      if (capacidadMaxima > 0 && ocupacionActual + 1 + acompanantes > capacidadMaxima) {
         throw new Error('AFORO_EXCEDIDO');
       }
 
@@ -186,11 +223,17 @@ export async function POST(
       return nuevaVisita;
     });
 
+    // Calcular ocupación después de la transacción
+    const ocupacionData = await calcularOcupacion(
+      codigo.restauranteId,
+      codigo.restaurante.capacidadMaxima
+    );
+
     return NextResponse.json(
       {
         success: true,
         message: 'Visita registrada exitosamente',
-        data: { visita: mapVisitaToPublico(visita) },
+        data: { visita: mapVisitaToPublico(visita), ocupacion: ocupacionData },
       },
       { status: 201 }
     );
@@ -203,10 +246,17 @@ export async function POST(
         );
       }
       if (error.message === 'AFORO_EXCEDIDO') {
+        // Calcular ocupación para incluir en la respuesta de error
+        const ocupacionData = await calcularOcupacion(
+          restauranteId,
+          capacidadMaxima
+        );
+
         return NextResponse.json(
           {
             success: false,
             message: 'Aforo completo. No hay suficientes plazas disponibles.',
+            data: { ocupacion: ocupacionData },
           },
           { status: 409 }
         );
