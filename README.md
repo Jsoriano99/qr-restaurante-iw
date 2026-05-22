@@ -1,77 +1,160 @@
-# 🍽️ Proyecto 12 – Control de Accesos por QR a Restaurantes
+# QR Restaurante — Control de Accesos por QR
 
-![Estado](https://img.shields.io/badge/Estado-En_Desarrollo-yellow?style=for-the-badge)
-![Sprint](https://img.shields.io/badge/Sprint-1-blue?style=for-the-badge)
-![Metodología](https://img.shields.io/badge/Metodología-SCRUMBAN-orange?style=for-the-badge)
-
-> **Objetivo Principal:** Automatizar el control de aforo en tiempo real en el sector de la restauración eliminando el error humano.
+Aplicación web para automatizar el control de aforo en restaurantes mediante códigos QR. Los clientes escanean un QR al entrar y salir, el sistema actualiza la ocupación en tiempo real, y los restaurantes gestionan todo desde un panel de control.
 
 ---
 
-## 📖 Descripción General
-Este proyecto consiste en el desarrollo de una aplicación web integral diseñada para automatizar el control de aforo en tiempo real. El sistema permite a los establecimientos generar códigos QR únicos que los clientes escanean al entrar y salir, garantizando una gestión del flujo de personas precisa y transaccional.
+## Tecnologías
 
-### ⚠️ El Problema
-La gestión actual del aforo suele depender de actualizaciones manuales por parte del personal. Esto genera información desfasada y ambigüedad para el cliente que intenta buscar mesa, especialmente en horas punta.
-
-### 💡 La Solución
-Automatizar el registro de entradas y salidas mediante tecnología QR. Esto elimina la intervención humana, ofreciendo disponibilidad de aforo **100% real y actualizada** para los usuarios en todo momento.
-
----
-
-## 🎯 Objetivos del Sistema
-
-- **🛂 Control de Aforo:** Motor transaccional para el registro exacto de entradas y salidas.
-- **📱 Generación de QR:** Creación y validación de códigos únicos e irrepetibles por restaurante.
-- **📊 Métricas de Afluencia:** Panel de datos para el hostelero sobre duración media de visitas e historial de ocupación.
-- **🔍 Visibilidad para el Cliente:** Listado de restaurantes filtrables por disponibilidad real y tipo de comida.
+| Capa | Stack |
+|------|-------|
+| Framework | Next.js 15 (App Router) |
+| Base de datos | SQLite + Prisma ORM |
+| Estilos | TailwindCSS 3 |
+| Autenticación | JWT (jose) + middleware RBAC |
+| Validación | Zod |
+| QR | qrcode + HMAC-SHA256 |
 
 ---
 
-## 🛠️ Metodología y Herramientas
+## Requisitos previos
 
-El proyecto se desarrolla siguiendo la metodología ágil **SCRUMBAN**, gestionando el ciclo de vida del software mediante *GitHub Projects* e *Issues*.
-
-| Herramienta | Uso en el Proyecto |
-| :---: | :--- |
-| **Git / GitHub** | Control de versiones y gestión de tareas (Kanban). |
-| **Markdown** | Documentación técnica y memorias. |
-| **UWE / MagicDraw** | Modelado de requisitos y arquitectura web. |
-| **OpenCode / Engram** | Asistentes de IA para acelerar el desarrollo y revisión de código. |
+- **Node.js** ≥ 18
+- **npm** ≥ 9
 
 ---
 
-## 👥 Organización del Equipo
+## Instalación y ejecución
 
-Al tratarse de un desarrollo individual, se asumen todos los roles definidos en la metodología de la asignatura para asegurar el ciclo de vida del software:
-
-- 📋 **Scrum Master:** Gestión del backlog y tableros Kanban.
-- 💻 **Desarrollador Full-Stack:** Implementación de Front-end, Back-end y APIs.
-- 🗄️ **Gestor de BD:** Diseño y mantenimiento del modelo de datos.
-- 📐 **Analista de Requisitos:** Modelado UWE y validación.
-
----
-
-## 📈 Estado del Proyecto (Sprint 1)
-
-> 🗓️ **Fecha de finalización Sprint 1:** 29 de Marzo de 2026  
-> **Foco actual:** Especificación de requisitos y sistema de registro básico.
-
-- [x] Configuración de entorno y metodología SCRUMBAN en GitHub.
-- [ ] Modelado de Requisitos en UWE (Casos de Uso y Actividades).
-- [ ] Implementación de la HU01: Registro de Restaurante.
-
----
-
-## 🚀 Despliegue en Local (Próximamente)
-
-*(Añade aquí en el futuro los comandos necesarios para arrancar tu proyecto. Por ejemplo:)*
 ```bash
 # 1. Clonar el repositorio
 git clone https://github.com/Jsoriano99/qr-restaurante-iw.git
+cd qr-restaurante-iw
 
 # 2. Instalar dependencias
-npm install / pip install -r requirements.txt
+npm install
 
-# 3. Arrancar el servidor
-npm run dev / python manage.py runserver
+# 3. Crear archivo .env con la clave de firma QR
+echo 'QR_HMAC_SECRET=restaurante-qr-hmac-secret-2026' > .env
+
+# 4. Ejecutar migraciones (crea la base de datos SQLite)
+npx prisma migrate dev
+
+# 5. Poblar con datos de prueba
+npx ts-node prisma/seed.ts
+
+# 6. Arrancar el servidor de desarrollo
+npm run dev
+```
+
+La aplicación estará disponible en **http://localhost:3000**.
+
+---
+
+## Credenciales de prueba
+
+El seed genera estos usuarios para probar la aplicación:
+
+| Rol | Email | Contraseña |
+|-----|-------|------------|
+| Administrador | admin@qr.com | Admin123! |
+| Restaurante 1 | restaurante1@qr.com | Restaurante123! |
+| Restaurante 2 | restaurante2@qr.com | Restaurante123! |
+| Cliente 1 | cliente1@qr.com | Cliente123! |
+| Cliente 2 | cliente2@qr.com | Cliente123! |
+
+### Datos de prueba incluidos
+
+| Restaurante | Tipo cocina | Capacidad |
+|-------------|-------------|-----------|
+| El Buen Gusto | Española | 50 |
+| La Terraza | Mediterránea | 80 |
+
+Se incluyen códigos QR, visitas de ejemplo y valoraciones preexistentes.
+
+---
+
+## Estructura del proyecto
+
+```
+src/
+├── app/
+│   ├── page.tsx                          # Home (V-01)
+│   ├── layout.tsx                        # Layout raíz
+│   ├── login/page.tsx                    # Login
+│   ├── register/page.tsx                 # Registro
+│   ├── admin/page.tsx                    # Panel admin
+│   ├── cliente/
+│   │   ├── page.tsx                      # Dashboard cliente
+│   │   ├── escanear/page.tsx             # Escaneo QR (V-04)
+│   │   ├── visitas/page.tsx              # Mis Visitas (V-07)
+│   │   └── valorar/[restauranteId]/      # Valoración (V-08)
+│   ├── restaurante/
+│   │   ├── page.tsx                      # Panel control (V-06)
+│   │   └── [id]/page.tsx                 # Detalle restaurante (V-03)
+│   ├── restaurantes/page.tsx             # Listado público (V-02)
+│   └── api/
+│       ├── auth/                         # Login, registro, refresh
+│       ├── cliente/
+│       │   ├── visitas/                  # Entrada/salida
+│       │   └── valoraciones/             # Crear y consultar
+│       ├── codigos-qr/[uuid]/            # Payload, imagen, validar
+│       ├── restaurante/                  # Ocupación, gestión QR
+│       └── restaurantes/                 # Listado + valoraciones
+├── components/
+│   ├── layout/                           # PublicHeader, cards
+│   ├── home/                             # FilterBar, HomeContent
+│   ├── cliente/                          # StarRating, ValorarForm
+│   └── restaurante/                      # Dashboard, KPIs, QR Manager
+├── lib/                                  # Prisma, auth, QR signing
+├── types/                                # TypeScript + Zod schemas
+└── middleware.ts                         # JWT + RBAC protección de rutas
+```
+
+---
+
+## Roles y permisos
+
+| Rol | Rutas protegidas | Funcionalidades |
+|-----|-----------------|-----------------|
+| **Público** | — | Home, listado restaurantes, detalle, valoraciones |
+| **CLIENTE** | `/cliente/*` | Escanear QR, registrar entrada/salida, ver visitas, valorar |
+| **RESTAURANTE** | `/restaurante/*` | Dashboard aforo, KPIs, gestionar QR, ver ocupación |
+| **ADMIN** | `/admin/*` | Panel de administración, reportes |
+
+---
+
+## APIs principales
+
+| Endpoint | Auth | Descripción |
+|----------|------|-------------|
+| `GET /api/restaurantes` | Público | Listado de restaurantes |
+| `GET /api/restaurantes/[id]/valoraciones` | Público | Valoraciones con media |
+| `GET /api/codigos-qr/[uuid]/payload` | Público | Payload + firma HMAC del QR |
+| `POST /api/cliente/visitas` | CLIENTE | Registrar entrada por QR |
+| `PATCH /api/cliente/visitas/[id]` | CLIENTE | Registrar salida |
+| `POST /api/cliente/valoraciones` | CLIENTE | Crear valoración (1-5★) |
+| `GET /api/restaurante/ocupacion` | RESTAURANTE | Ocupación en tiempo real |
+| `POST /api/restaurante/codigos-qr` | RESTAURANTE | Generar nuevo QR |
+
+---
+
+## Testing
+
+```bash
+# Instalar dependencias de testing
+pip install pytest requests
+
+# Ejecutar tests automatizados (requiere la app corriendo en localhost:3000)
+pytest overleaf/diagramas_convertidos/test_pruebas.py -v
+```
+
+Se realizaron pruebas de base de datos (SQLite), seguridad (OWASP Top 10), funcionalidad (requisitos RF-01 a RF-04), compatibilidad (multiplataforma) y rendimiento (First Load JS < 5 kB en todas las páginas). Ver `overleaf/sections/04_practica4.tex` para el informe completo.
+
+---
+
+## Autor
+
+**Jorge Soriano Pijuán** — Grado en Ingeniería Informática, Universidad de Córdoba.
+
+Proyecto para la asignatura de Ingeniería Web (3er curso).
