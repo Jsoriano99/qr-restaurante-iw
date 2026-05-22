@@ -13,9 +13,9 @@ El Modelo de Contenido representa la estructura estática del sistema: las entid
 
 \subsection{Diagrama de Clases}
 
-\begin{figure}[hbt!]
+\begin{figure}[H]
     \centering
-    \includegraphics[width=0.9\textwidth]{images/modelo_contenido.png}
+    \includegraphics[width=0.85\textwidth,height=0.80\textheight,keepaspectratio]{images/modelo_contenido.png}
     \caption{Diagrama de Clases — Modelo de Contenido del sistema QR Restaurante.}
     \label{fig:modelo_contenido}
 \end{figure}
@@ -97,7 +97,7 @@ Usuario del sistema con privilegios elevados para la gestión global.
 
 \subsection{Cardinalidades clave}
 
-\begin{table}[hbt!]
+\begin{table}[H]
     \centering
     \caption{Resumen de cardinalidades del Modelo de Contenido}
     \label{tab:cardinalidades}
@@ -129,6 +129,74 @@ El Modelo de Contenido se deriva directamente de los requisitos de información 
     \item \textbf{RF-04} (Control de aforo) → Atributo \textit{capacidadMaxima} de \textit{Restaurante} comparado con el conteo de visitas activas.
 \end{itemize}
 
+\section{Modelo de Usuario}
+
+\subsection{Objetivo}
+El Modelo de Usuario complementa al Modelo de Contenido representando la información del sistema que puede ser \textbf{adaptada} al usuario, ya sea por sus propiedades intrínsecas (rol, autenticación) o por las características de su entorno de uso (dispositivo, ubicación). Responde a la pregunta: \textit{¿Qué datos del usuario y su contexto debe gestionar el sistema para adaptar la experiencia?} \cite{UWE2014}
+
+\subsection{Clases del Modelo de Usuario}
+
+A continuación se describen las clases que conforman el modelo de adaptación al usuario del sistema QR Restaurante, representadas mediante un diagrama de clases UML.
+
+\subsubsection{Clase: Usuario (Abstracta)}
+Clase base que encapsula los atributos comunes a todos los roles del sistema.
+
+\begin{itemize}
+    \item \textbf{Atributos:} id, nombre, email, contrasenaHash, telefono, fechaRegistro, ultimoAcceso
+    \item \textbf{Estado de sesión:} autenticado (booleano), timestampSesion
+    \item \textbf{Relaciones:}
+    \begin{itemize}
+        \item 1 → 1 \textit{Sesion} (cada usuario tiene una sesión activa)
+        \item 1 → N \textit{Preferencia} (cada usuario puede tener múltiples preferencias)
+    \end{itemize}
+\end{itemize}
+
+\subsubsection{Clase: Sesion}
+Gestiona el estado de la sesión del usuario, permitiendo la adaptación de la interfaz según el contexto de acceso.
+
+\begin{itemize}
+    \item \textbf{Atributos:} tokenSesion, timestampInicio, timestampExpiracion, dispositivo (mobile/desktop/tablet), direccionIP, ubicacionGeografica (opcional)
+    \item \textbf{Finalidad:} Mantener el estado del usuario durante su interacción, permitir el cierre de sesión automático por inactividad y adaptar la vista al dispositivo detectado.
+\end{itemize}
+
+\subsubsection{Clase: Preferencia}
+Almacena las preferencias configuradas por el usuario para personalizar su experiencia en el sistema.
+
+\begin{itemize}
+    \item \textbf{Atributos:} id, clave (tipoCocinaFavorito, radioBusqueda, ordenacionPorDefecto, idioma), valor
+    \item \textbf{Finalidad:} Recordar las opciones de filtrado y visualización elegidas por el cliente para agilizar búsquedas futuras.
+\end{itemize}
+
+\subsubsection{Roles del Sistema}
+
+El sistema distingue tres roles con perfiles de acceso diferenciados, modelados como especializaciones de la clase \textit{Usuario}:
+
+\begin{itemize}
+    \item \textbf{Cliente:} Usuario final que escanea códigos QR, consulta restaurantes y realiza valoraciones. Sin autenticación puede consultar el listado; con autenticación puede registrar entradas y gestionar sus visitas.
+    \item \textbf{Restaurante:} Propietario o gerente del establecimiento. Accede al panel de control, gestiona códigos QR y consulta reportes de afluencia.
+    \item \textbf{Administrador:} Usuario con privilegios globales. Gestiona restaurantes, usuarios y visualiza reportes globales del sistema.
+\end{itemize}
+
+\subsection{Adaptación por contexto}
+
+Siguiendo las directrices de UWE \cite{UWE2014}, el sistema contempla los siguientes niveles de adaptación:
+
+\begin{itemize}
+    \item \textbf{Por rol:} Cada tipo de usuario (cliente, restaurante, administrador) accede a un conjunto diferente de vistas y operaciones, tal como se refleja en el Modelo de Navegación (Sección \ref{fig:nav_cliente} a \ref{fig:nav_admin}).
+    \item \textbf{Por estado de autenticación:} Un cliente anónimo puede consultar el listado de restaurantes, pero necesita autenticarse para escanear un QR y registrar una entrada.
+    \item \textbf{Por dispositivo:} La interfaz se adapta al dispositivo detectado en la sesión (mobile para escaneo QR, desktop para panel de control), cumpliendo el requisito \textbf{RNF-01} (interfaz responsive).
+    \item \textbf{Por preferencias:} Los filtros de búsqueda (tipo de cocina, radio de distancia) se persisten en la clase \textit{Preferencia} para personalizar la experiencia recurrente.
+\end{itemize}
+
+\subsection{Trazabilidad a requisitos}
+
+\begin{itemize}
+    \item \textbf{RF-01} (Registro de establecimientos) → Roles \textit{Restaurante} y \textit{Administrador}.
+    \item \textbf{RF-03} (Registro de entrada por QR) → Rol \textit{Cliente} autenticado.
+    \item \textbf{RNF-01} (Interfaz responsive) → Atributo \textit{dispositivo} de \textit{Sesion} para adaptación de vista.
+    \item \textbf{RNF-02} (Seguridad) → Atributos \textit{tokenSesion} y \textit{timestampExpiracion} para gestión de sesiones seguras.
+\end{itemize}
+
 \section{Modelo de Navegación}
 
 \subsection{Objetivo}
@@ -136,13 +204,13 @@ El Modelo de Navegación define la estructura de páginas del sistema y los fluj
 
 \subsection{Mapa del Sitio}
 
-\begin{figure}[hbt!]
+\begin{figure}[H]
     \centering
-    \resizebox{\textwidth}{!}{%
+    \resizebox{0.92\textwidth}{!}{%
     \begin{tikzpicture}[
-        every node/.style={draw, rounded corners, align=center, font=\small},
-        level distance=2.2cm,
-        sibling distance=2.5cm
+        every node/.style={draw, rounded corners, align=center, font=\footnotesize},
+        level distance=1.8cm,
+        sibling distance=2cm
     ]
 \node (home) {Inicio /\\Home}
     child {node (reg) {Registro\\Restaurante}
@@ -165,7 +233,8 @@ El Modelo de Navegación define la estructura de páginas del sistema y los fluj
         }
         child {node (admin) {Panel\\Administrador}}
 };
-\end{tikzpicture}}
+\end{tikzpicture}
+}
     \caption{Mapa del Sitio — Estructura de navegación del sistema.}
     \label{fig:mapa_sitio}
 \end{figure}
@@ -174,11 +243,13 @@ El Modelo de Navegación define la estructura de páginas del sistema y los fluj
 
 \subsubsection{Cliente (Visitante / Usuario Registrado)}
 
-\begin{figure}[hbt!]
+\begin{figure}[H]
     \centering
 \scalebox{0.85}{
 \begin{tikzpicture}[node distance=2.2cm,
     every node/.style={draw, rounded corners, align=center, minimum width=2.5cm, font=\footnotesize},
+    startstop/.style={},
+    process/.style={},
     flecha/.style={->, >=stealth, thick}
 ]
 \node (home) [startstop] {Home};
@@ -199,21 +270,23 @@ El Modelo de Navegación define la estructura de páginas del sistema y los fluj
 \draw [flecha] (det) -- node[right] {Entrar} (entrada);
 \draw [flecha] (det) -- (misvisitas);
 \draw [flecha] (misvisitas) -- (salida);
-\draw [flecha] (salida) -- node[above] {¿Valorar?} (valorar);
+\draw [flecha] (salida) -- node[above] {Valorar} (valorar);
 \draw [flecha] (scan.south) |- (entrada);
 \end{tikzpicture}
 }
-    \caption{Diagrama de Navegación — Actor: Cliente.}
+    \caption{Diagrama de Navegaci\'on --- Actor: Cliente.}
     \label{fig:nav_cliente}
 \end{figure}
 
 \subsubsection{Restaurante (Propietario / Gerente)}
 
-\begin{figure}[hbt!]
+\begin{figure}[H]
     \centering
 \scalebox{0.85}{
 \begin{tikzpicture}[node distance=2.2cm,
     every node/.style={draw, rounded corners, align=center, minimum width=2.5cm, font=\footnotesize},
+    startstop/.style={},
+    process/.style={},
     flecha/.style={->, >=stealth, thick}
 ]
 \node (login) [startstop] {Login};
@@ -232,24 +305,26 @@ El Modelo de Navegación define la estructura de páginas del sistema y los fluj
 \draw [flecha] (reportes) -- (afluencia);
 \end{tikzpicture}
 }
-    \caption{Diagrama de Navegación — Actor: Restaurante.}
+    \caption{Diagrama de Navegaci\'on --- Actor: Restaurante.}
     \label{fig:nav_restaurante}
 \end{figure}
 
 \subsubsection{Administrador}
 
-\begin{figure}[hbt!]
+\begin{figure}[H]
     \centering
 \scalebox{0.85}{
 \begin{tikzpicture}[node distance=2.2cm,
     every node/.style={draw, rounded corners, align=center, minimum width=2.5cm, font=\footnotesize},
+    startstop/.style={},
+    process/.style={},
     flecha/.style={->, >=stealth, thick}
 ]
 \node (login) [startstop] {Login Admin};
-\node (gestion) [process, below of=login] {Gestión\\Restaurantes};
+\node (gestion) [process, below of=login] {Gesti\'on\\Restaurantes};
 \node (reportes) [process, right of=gestion, xshift=3cm] {Reportes\\Globales};
-\node (usuarios) [process, below of=gestion] {Gestión\\Usuarios};
-\node (config) [process, below of=usuarios] {Configuración\\Sistema};
+\node (usuarios) [process, below of=gestion] {Gesti\'on\\Usuarios};
+\node (config) [process, below of=usuarios] {Configuraci\'on\\Sistema};
 
 \draw [flecha] (login) -- (gestion);
 \draw [flecha] (gestion) -- (reportes);
@@ -273,7 +348,7 @@ El Modelo de Proceso define la lógica de negocio que ocurre \textit{por detrás
 
 \subsection{Estructura de Proceso}
 
-\begin{figure}[hbt!]
+\begin{figure}[H]
     \centering
     \resizebox{\textwidth}{!}{%
     \begin{tikzpicture}[
@@ -297,18 +372,19 @@ El Modelo de Proceso define la lógica de negocio que ocurre \textit{por detrás
 \draw [flecha] (p5) -- (p6);
 \draw [flecha] (p5) |- (p7);
 \draw [flecha] (p4) -- (p8);
-\end{tikzpicture}}
+\end{tikzpicture}
+}
     \caption{Estructura de Proceso — Clases de proceso y sus interrelaciones.}
     \label{fig:estructura_proceso}
 \end{figure}
 
 \subsection{Descripción de cada Clase de Proceso}
 
-\begin{table}[hbt!]
+\begin{table}[H]
     \centering
     \caption{Clases de Proceso y su correspondencia con requisitos}
     \label{tab:clases_proceso}
-    \begin{tabular}{|l|l|l|}
+    \begin{tabular}{|>{\raggedright\arraybackslash}p{0.23\textwidth}|>{\raggedright\arraybackslash}p{0.52\textwidth}|>{\raggedright\arraybackslash}p{0.17\textwidth}|}
         \hline
         \textbf{Clase de Proceso} & \textbf{Descripción} & \textbf{Requisitos} \\
         \hline
@@ -351,7 +427,7 @@ En lugar de wireframes estáticos (que requieren herramientas de diseño como Fi
 
 \subsection{Vistas del Sistema}
 
-\begin{figure}[hbt!]
+\begin{figure}[H]
     \centering
     \includegraphics[width=0.95\textwidth]{images/modelo_presentacion.png}
     \caption{Diagrama de Presentación — Flujo entre vistas principales.}
@@ -360,38 +436,34 @@ En lugar de wireframes estáticos (que requieren herramientas de diseño como Fi
 
 \subsubsection{Vista 1: Home / Inicio}
 
-\begin{table}[hbt!]
+\begin{table}[H]
     \centering
     \caption{V-01: Home / Inicio}
     \label{tab:vista01}
-    \begin{tabular}{|l|l|}
+    \begin{tabular}{|>{\raggedright\arraybackslash}p{0.30\textwidth}|>{\raggedright\arraybackslash}p{0.62\textwidth}|}
         \hline
         \textbf{Componente} & \textbf{Descripción} \\
         \hline
-        Cabecera & Logo, nombre del sistema, menú de navegación (Login/Registro) \\
+        Hero Section & Degradado naranja, eslogan del servicio, dos CTA: ``Registrate Gratis'' (\(\rightarrow\) /register) y ``Explorá Restaurantes'' (\(\rightarrow\) /restaurantes) \\
         \hline
-        Hero Section & Imagen destacada, eslogan del servicio, CTA ``Buscar restaurante'' \\
+        Sección destacados & Top 6 restaurantes ordenados por nombre, cada card muestra: nombre, dirección, tipoCocina, horarios \\
         \hline
-        Sección destacados & Cards con los 5 restaurantes mejor valorados \\
+        Filtros rápidos & Pills por tipo de cocina con filtrado client-side \\
         \hline
-        Filtros rápidos & Tipo de cocina, cercanía, disponibilidad \\
+        \textbf{Actor} & Todos (público) \\
         \hline
-        Footer & Enlaces legales, contacto, redes sociales \\
-        \hline
-        \textbf{Actor} & Cliente (anon/autenticado), Restaurante, Admin \\
-        \hline
-        \textbf{Requisitos} & RF-03, RF-04 \\
+        \textbf{Requisitos} & RF-03 \\
         \hline
     \end{tabular}
 \end{table}
 
 \subsubsection{Vista 02: Listado de Restaurantes}
 
-\begin{table}[hbt!]
+\begin{table}[H]
     \centering
     \caption{V-02: Listado de Restaurantes}
     \label{tab:vista02}
-    \begin{tabular}{|l|l|}
+    \begin{tabular}{|>{\raggedright\arraybackslash}p{0.30\textwidth}|>{\raggedright\arraybackslash}p{0.62\textwidth}|}
         \hline
         \textbf{Componente} & \textbf{Descripción} \\
         \hline
@@ -399,7 +471,7 @@ En lugar de wireframes estáticos (que requieren herramientas de diseño como Fi
         \hline
         Ordenación & Opciones: por distancia, por valoración media, por capacidad disponible \\
         \hline
-        Grid de cards & Por cada restaurante: foto, nombre, tipo de cocina, distancia, valoración ★, plazas libres / total, botón ``Ver detalles'' \\
+        Grid de cards & Por cada restaurante: foto, nombre, tipo de cocina, distancia, valoración $\star$, plazas libres / total, botón ``Ver detalles'' \\
         \hline
         Paginación & 10 resultados por página con navegación \\
         \hline
@@ -414,15 +486,15 @@ En lugar de wireframes estáticos (que requieren herramientas de diseño como Fi
 
 \subsubsection{Vista 03: Detalle de Restaurante}
 
-\begin{table}[hbt!]
+\begin{table}[H]
     \centering
     \caption{V-03: Detalle de Restaurante}
     \label{tab:vista03}
-    \begin{tabular}{|l|l|}
+    \begin{tabular}{|>{\raggedright\arraybackslash}p{0.30\textwidth}|>{\raggedright\arraybackslash}p{0.62\textwidth}|}
         \hline
         \textbf{Componente} & \textbf{Descripción} \\
         \hline
-        Cabecera del local & Foto principal, nombre, tipo de cocina, valoración media ★, número de valoraciones \\
+        Cabecera del local & Foto principal, nombre, tipo de cocina, valoración media $\star$, número de valoraciones \\
         \hline
         Información & Dirección, horario de aforo, capacidad (ocupación actual / máxima), distancia al usuario \\
         \hline
@@ -430,7 +502,7 @@ En lugar de wireframes estáticos (que requieren herramientas de diseño como Fi
         \hline
         Botón ``Escanear para entrar'' & Lanzar cámara del dispositivo → ProcesoEscaneo \\
         \hline
-        Sección de valoraciones & Lista de valoraciones con puntuación, comentario, fecha y autor \\
+        Sección de valoraciones & Promedio con estrellas visuales, lista de valoraciones con nombre del cliente, fecha y comentario \\
         \hline
         \textbf{Actor} & Cliente, Restaurante \\
         \hline
@@ -441,11 +513,11 @@ En lugar de wireframes estáticos (que requieren herramientas de diseño como Fi
 
 \subsubsection{Vista 04: Escaneo QR / Registro de Entrada}
 
-\begin{table}[hbt!]
+\begin{table}[H]
     \centering
     \caption{V-04: Escaneo y Registro de Entrada}
     \label{tab:vista04}
-    \begin{tabular}{|l|l|}
+    \begin{tabular}{|>{\raggedright\arraybackslash}p{0.30\textwidth}|>{\raggedright\arraybackslash}p{0.62\textwidth}|}
         \hline
         \textbf{Componente} & \textbf{Descripción} \\
         \hline
@@ -468,11 +540,11 @@ En lugar de wireframes estáticos (que requieren herramientas de diseño como Fi
 
 \subsubsection{Vista 05: Registro de Restaurante (Admin/Propietario)}
 
-\begin{table}[hbt!]
+\begin{table}[H]
     \centering
     \caption{V-05: Registro de Restaurante}
     \label{tab:vista05}
-    \begin{tabular}{|l|l|}
+    \begin{tabular}{|>{\raggedright\arraybackslash}p{0.30\textwidth}|>{\raggedright\arraybackslash}p{0.62\textwidth}|}
         \hline
         \textbf{Componente} & \textbf{Descripción} \\
         \hline
@@ -495,15 +567,15 @@ En lugar de wireframes estáticos (que requieren herramientas de diseño como Fi
 
 \subsubsection{Vista 06: Panel de Control del Restaurante}
 
-\begin{table}[hbt!]
+\begin{table}[H]
     \centering
     \caption{V-06: Panel de Control del Restaurante}
     \label{tab:vista06}
-    \begin{tabular}{|l|l|}
+    \begin{tabular}{|>{\raggedright\arraybackslash}p{0.30\textwidth}|>{\raggedright\arraybackslash}p{0.62\textwidth}|}
         \hline
         \textbf{Componente} & \textbf{Descripción} \\
         \hline
-        Dashboard & Gráfico de ocupación en tiempo real (% barra + indicador color: verde/amarillo/rojo) \\
+        Dashboard & Gráfico de ocupación en tiempo real (\% barra + indicador color: verde/amarillo/rojo) \\
         \hline
         Indicadores KPIs & Aforo actual / máximo, visitas hoy, duración media, media de acompañantes \\
         \hline
@@ -522,11 +594,11 @@ En lugar de wireframes estáticos (que requieren herramientas de diseño como Fi
 
 \subsubsection{Vista 07: Mis Visitas (Cliente)}
 
-\begin{table}[hbt!]
+\begin{table}[H]
     \centering
     \caption{V-07: Mis Visitas}
     \label{tab:vista07}
-    \begin{tabular}{|l|l|}
+    \begin{tabular}{|>{\raggedright\arraybackslash}p{0.30\textwidth}|>{\raggedright\arraybackslash}p{0.62\textwidth}|}
         \hline
         \textbf{Componente} & \textbf{Descripción} \\
         \hline
@@ -534,7 +606,7 @@ En lugar de wireframes estáticos (que requieren herramientas de diseño como Fi
         \hline
         Visita activa & Botón ``Registrar salida'' con confirmación de acompañantes originales \\
         \hline
-        Tras registrar salida & Botón ``Valorar esta visita'' → redirige a V-08 \\
+        Tras registrar salida & Botón ``Valorá este restaurante'' (\(\rightarrow\) /valorar), visible solo si no hay valoración previa del cliente a ese restaurante \\
         \hline
         Historial & Visitas pasadas ordenadas cronológicamente, paginación \\
         \hline
@@ -547,21 +619,25 @@ En lugar de wireframes estáticos (que requieren herramientas de diseño como Fi
 
 \subsubsection{Vista 08: Valoración}
 
-\begin{table}[hbt!]
+\begin{table}[H]
     \centering
     \caption{V-08: Valoración de Restaurante}
     \label{tab:vista08}
-    \begin{tabular}{|l|l|}
+    \begin{tabular}{|>{\raggedright\arraybackslash}p{0.30\textwidth}|>{\raggedright\arraybackslash}p{0.62\textwidth}|}
         \hline
         \textbf{Componente} & \textbf{Descripción} \\
         \hline
-        Selector de estrellas & 5 estrellas seleccionables con previsualización \\
+        StarRating & Componente accesible con ARIA (rol radiogroup), 5 estrellas seleccionables con navegación por teclado \\
         \hline
         Campo de comentario & Textarea, máx. 500 caracteres, con contador \\
         \hline
-        Validación & Alerta si comentario contiene contenido ofensivo (filtro básico) o si la valoración ya fue enviada \\
+        Validación & Zod: puntuación 1--5, comentario máx.\ 500 caracteres. Prevención de duplicados: constraint UNIQUE [clienteId, restauranteId] con captura del error Prisma P2002 \\
         \hline
         Botón ``Enviar'' & Guarda valoración → recálculo de media en tiempo real \\
+        \hline
+        Integración V-03 & La sección de valoraciones en el detalle del restaurante consume la media y el listado de reviews \\
+        \hline
+        Integración V-07 & Link ``Valorá'' visible en visitas completadas, solo si no existe valoración previa \\
         \hline
         \textbf{Actor} & Cliente \\
         \hline
@@ -572,11 +648,11 @@ En lugar de wireframes estáticos (que requieren herramientas de diseño como Fi
 
 \subsubsection{Vista 09: Reportes (Administrador)}
 
-\begin{table}[hbt!]
+\begin{table}[H]
     \centering
     \caption{V-09: Reportes de Afluencia}
     \label{tab:vista09}
-    \begin{tabular}{|l|l|}
+    \begin{tabular}{|>{\raggedright\arraybackslash}p{0.30\textwidth}|>{\raggedright\arraybackslash}p{0.62\textwidth}|}
         \hline
         \textbf{Componente} & \textbf{Descripción} \\
         \hline
@@ -599,10 +675,11 @@ En lugar de wireframes estáticos (que requieren herramientas de diseño como Fi
 
 \subsection{Correspondencia Vistas $\leftrightarrow$ Requisitos}
 
-\begin{table}[hbt!]
+\begin{table}[H]
     \centering
     \caption{Matriz de trazabilidad: Vistas $\times$ Requisitos}
     \label{tab:trazabilidad}
+    \resizebox{\textwidth}{!}{%
     \small
     \begin{tabular}{|c|c|c|c|c|c|c|c|}
         \hline
@@ -626,7 +703,8 @@ En lugar de wireframes estáticos (que requieren herramientas de diseño como Fi
         \hline
         V-09 Reportes & --- & --- & --- & --- & --- & contrib. & contrib. \\
         \hline
-    \end{tabular}
+    \end{tabular}%
+    }
 
     \vspace{0.3cm}
     \footnotesize contrib. = contribución indirecta; ✓ = satisface directamente; RNF = RNF-01/02/03.
@@ -638,18 +716,18 @@ En lugar de wireframes estáticos (que requieren herramientas de diseño como Fi
 
 A continuación se presenta el diagrama de secuencia del flujo más crítico del sistema: el \textit{escaneo de QR y registro de entrada}, que involucra la interacción entre el cliente, la aplicación web y la base de datos.
 
-\begin{figure}[hbt!]
+\begin{figure}[H]
     \centering
-    \resizebox{\textwidth}{!}{%
+    \resizebox{0.95\textwidth}{!}{%
     \begin{tikzpicture}[
-        actor/.style={draw, rounded corners, fill=yellow!20, minimum width=2cm, align=center},
-        box/.style={draw, rounded corners=3pt, fill=blue!8, minimum width=2.2cm, align=center, font=\footnotesize},
+        actor/.style={draw, rounded corners, fill=yellow!20, minimum width=1.8cm, align=center, font=\footnotesize},
+        box/.style={draw, rounded corners=3pt, fill=blue!8, minimum width=2cm, align=center, font=\footnotesize},
         dbase/.style={draw, rounded corners, fill=green!10, minimum width=2cm, align=center, font=\footnotesize},
-        flecha/.style={->, >=stealth}
+        flecha/.style={->, >=stealth, font=\footnotesize}
     ]
 \node (cliente) [actor] {Cliente};
-\node (app) [box, below of=cliente, yshift=-1.5cm] {Aplicación\\Web};
-\node (db) [dbase, below of=app, yshift=-1.5cm] {Base de\\Datos};
+\node (app) [box, below of=cliente, yshift=-2cm] {Aplicación\\Web};
+\node (db) [dbase, below of=app, yshift=-2cm] {Base de\\Datos};
 
 % 1. Cliente abre app
 \draw [flecha] (cliente) -- node[left] {1. Abrir app} (app);
@@ -676,11 +754,12 @@ A continuación se presenta el diagrama de secuencia del flujo más crítico del
 % 7. Respuesta al cliente
 \draw [flecha] (app) -- node[left] {11. Entrada registrada} (cliente);
 
-\draw [flecha] (cliente) |- node[left, pos=0.7] {12. Ingresar\\acompañantes} (app);
+\draw [flecha] (cliente) |- node[left, pos=0.7, align=left] {12. Ingresar\\acompañantes} (app);
 \draw [flecha] (app) -- node[left] {13. Actualizar acompañantes} (db);
 \draw [flecha] (db) -- node[right] {14. OK} (app);
 \draw [flecha] (app) -- (cliente);
-\end{tikzpicture}}
+\end{tikzpicture}
+}
     \caption{Diagrama de Secuencia — Escaneo QR y Registro de Entrada.}
     \label{fig:secuencia_entrada}
 \end{figure}
@@ -688,7 +767,7 @@ A continuación se presenta el diagrama de secuencia del flujo más crítico del
 \section{Decisiones de Diseño}
 
 \begin{enumerate}
-    \item \textbf{Modelo relacional sobre NoSQL:} Se opta por una base de datos relacional (por ejemplo, PostgreSQL) por la naturaleza transaccional del sistema (entradas/salidas con consistencia de aforo), donde la integridad referencial es crítica.
+    \item \textbf{Modelo relacional sobre NoSQL:} Se opta por una base de datos relacional (SQLite via Prisma ORM en desarrollo) por la naturaleza transaccional del sistema (entradas/salidas con consistencia de aforo), donde la integridad referencial es crítica.
 
     \item \textbf{Trazabilidad de requisitos:} Cada modelo presenta una sección explícita de trazabilidad que conecta los requisitos de la Práctica 2 con los artefactos de diseño generados.
 
