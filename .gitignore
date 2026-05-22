@@ -41,3 +41,9 @@ start-server.sh
 *.synctex.gz
 *.pdf
 
+# Archivos de la memoria y desarrollo (no parte de la app)
+.agent/
+.atl/
+diagramas_convertidos/
+objetivo/
+overleaf/
